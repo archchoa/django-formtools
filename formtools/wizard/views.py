@@ -274,8 +274,8 @@ class WizardView(TemplateView):
         # contains a valid step name. If one was found, render the requested
         # form. (This makes stepping back a lot easier).
         wizard_goto_step = self.request.POST.get('wizard_goto_step', None)
-        if wizard_goto_step and wizard_goto_step in self.get_form_list():
-            return self.render_goto_step(wizard_goto_step)
+        # if wizard_goto_step and wizard_goto_step in self.get_form_list():
+        #     return self.render_goto_step(wizard_goto_step)
 
         # Check if form was refreshed
         management_form = ManagementForm(self.request.POST, prefix=self.prefix)
@@ -296,6 +296,9 @@ class WizardView(TemplateView):
             # if the form is valid, store the cleaned data and files.
             self.storage.set_step_data(self.steps.current, self.process_step(form))
             self.storage.set_step_files(self.steps.current, self.process_step_files(form))
+
+            if wizard_goto_step and wizard_goto_step in self.get_form_list():
+                return self.render_goto_step(wizard_goto_step)
 
             # check if the current step is the last step
             if self.steps.current == self.steps.last:
@@ -687,9 +690,9 @@ class NamedUrlWizardView(WizardView):
         Do a redirect if user presses the prev. step button. The rest of this
         is super'd from WizardView.
         """
-        wizard_goto_step = self.request.POST.get('wizard_goto_step', None)
-        if wizard_goto_step and wizard_goto_step in self.get_form_list():
-            return self.render_goto_step(wizard_goto_step)
+        # wizard_goto_step = self.request.POST.get('wizard_goto_step', None)
+        # if wizard_goto_step and wizard_goto_step in self.get_form_list():
+        #     return self.render_goto_step(wizard_goto_step)
         return super(NamedUrlWizardView, self).post(*args, **kwargs)
 
     def get_context_data(self, form, **kwargs):
