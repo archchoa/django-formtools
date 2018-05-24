@@ -164,6 +164,12 @@ class WizardView(TemplateView):
 
         form_list = form_list or kwargs.pop('form_list', getattr(cls, 'form_list', None)) or []
 
+        # build the kwargs for the wizardview instances
+        kwargs['form_list'] = cls.build_form_list(form_list)
+        return kwargs
+
+    @classmethod
+    def build_form_list(cls, form_list):
         computed_form_list = OrderedDict()
 
         assert len(form_list) > 0, 'at least one form is needed'
@@ -194,9 +200,7 @@ class WizardView(TemplateView):
                         "wizard view in order to handle file uploads."
                     )
 
-        # build the kwargs for the wizardview instances
-        kwargs['form_list'] = computed_form_list
-        return kwargs
+        return computed_form_list
 
     def get_prefix(self, request, *args, **kwargs):
         # TODO: Add some kind of unique id to prefix
