@@ -103,6 +103,17 @@ class BaseStorage(object):
             files[field] = self._files[(step, field)]
         return files or None
 
+    def get_step_files_dict(self, step):
+        """Returns a dictionary of temporarily uploaded files in storage"""
+        wizard_files = self.data[self.step_files_key].get(step, {})
+
+        if wizard_files and not self.file_storage:
+            raise NoFileStorageConfigured(
+                "You need to define 'file_storage' in your "
+                "wizard view in order to handle file uploads.")
+
+        return wizard_files or None
+
     def set_step_files(self, step, files):
         if files and not self.file_storage:
             raise NoFileStorageConfigured(
