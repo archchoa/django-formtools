@@ -341,7 +341,7 @@ class WizardView(TemplateView):
             files=self.storage.get_step_files(self.steps.current))
         return self.render(form)
 
-    def render_done(self, form, **kwargs):
+    def render_done(self, form, skip_revalidation=False, **kwargs):
         """
         This method gets called when all forms passed. The method should also
         re-validate all steps to prevent manipulation. If any form fails to
@@ -349,6 +349,7 @@ class WizardView(TemplateView):
         If everything is fine call `done`.
         """
         final_forms = OrderedDict()
+        valid_form_count = 0
         # walk through the form list and try to validate the data again.
         for form_key in self.get_form_list():
             form_obj = self.get_form(
@@ -356,7 +357,14 @@ class WizardView(TemplateView):
                 data=self.storage.get_step_data(form_key),
                 files=self.storage.get_step_files(form_key)
             )
-            if not form_obj.is_valid():
+            # skip revalidation if form does not contain any data at all
+            # only skip if the wizard was able to validate at least one form
+            if (skip_revalidation and not form_obj.is_bound and
+                valid_form_count > 0):
+                pass
+            elif skip_revalidation and form_obj.is_valid():
+                valid_form_count = valid_form_count + 1
+            elif not form_obj.is_valid():
                 return self.render_revalidation_failure(form_key, form_obj, **kwargs)
             final_forms[form_key] = form_obj
 
