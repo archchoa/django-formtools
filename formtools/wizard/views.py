@@ -305,7 +305,8 @@ class WizardView(TemplateView):
                 return self.render_goto_step(wizard_goto_step)
 
             # check if the current step is the last step
-            if self.steps.current == self.steps.last:
+            if (self.steps.current == self.steps.last or
+                self.force_render_done()):
                 # no more steps, render done view
                 return self.render_done(form, **kwargs)
             else:
@@ -604,6 +605,13 @@ class WizardView(TemplateView):
             % self.__class__.__name__
         )
 
+    def force_render_done(self):
+        """
+        Returns if render_done() should be forcefully called or not.
+        Returns False by default.
+        """
+        return False
+
 
 class SessionWizardView(WizardView):
     """
@@ -706,6 +714,14 @@ class NamedUrlWizardView(WizardView):
         # if wizard_goto_step and wizard_goto_step in self.get_form_list():
         #     return self.render_goto_step(wizard_goto_step)
         return super(NamedUrlWizardView, self).post(*args, **kwargs)
+
+    def force_render_done(self):
+        """
+        Allows `render_done` to be called after current step is processed, if
+        the value of `wizard_goto_step` is the same as `done_step_name`.
+        """
+        wizard_goto_step = self.request.POST.get('wizard_goto_step', None)
+        return wizard_goto_step and wizard_goto_step == self.done_step_name
 
     def get_context_data(self, form, **kwargs):
         """
