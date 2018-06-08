@@ -342,7 +342,7 @@ class WizardView(TemplateView):
             files=self.storage.get_step_files(self.steps.current))
         return self.render(form)
 
-    def render_done(self, form, skip_revalidation=False, **kwargs):
+    def render_done(self, form, **kwargs):
         """
         This method gets called when all forms passed. The method should also
         re-validate all steps to prevent manipulation. If any form fails to
@@ -358,13 +358,9 @@ class WizardView(TemplateView):
                 data=self.storage.get_step_data(form_key),
                 files=self.storage.get_step_files(form_key)
             )
-            # skip revalidation if form does not contain any data at all
-            # only skip if the wizard was able to validate at least one form
-            if (skip_revalidation and not form_obj.is_bound and
-                valid_form_count > 0):
+            # skip revalidation if there exists a `skip_revalidation` method
+            if self.skip_revalidation(form_key, form_obj):
                 pass
-            elif skip_revalidation and form_obj.is_valid():
-                valid_form_count = valid_form_count + 1
             elif not form_obj.is_valid():
                 return self.render_revalidation_failure(form_key, form_obj, **kwargs)
             final_forms[form_key] = form_obj
@@ -610,6 +606,9 @@ class WizardView(TemplateView):
         Returns if render_done() should be forcefully called or not.
         Returns False by default.
         """
+        return False
+
+    def skip_revalidation(self, step, form):
         return False
 
 
